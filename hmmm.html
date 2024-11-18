@@ -1,0 +1,822 @@
+
+<html><head><base href="." />
+<title>Cube Dodger</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+    body {
+        margin: 0;
+        overflow: hidden;
+        background: #000;
+        font-family: Arial, sans-serif;
+        user-select: none; /* Disable text selection across the site */
+    }
+    #menu {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.8);
+        padding: 40px;
+        border-radius: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        text-align: center;
+        z-index: 100;
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+    }
+    #menu h1 {
+        color: white;
+        font-size: 48px;
+        margin-bottom: 30px;
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        font-family: 'Press Start 2P', cursive; /* Apply the new "cubique" font */
+    }
+    .menu-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        padding: 12px 24px;
+        margin: 10px;
+        font-size: 18px;
+        border-radius: 5px;
+        cursor: pointer;
+        color: white;
+        transition: all 0.2s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: relative;
+        overflow: hidden;
+    }
+    .menu-btn::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 70%);
+        transform: rotate(45deg);
+        transition: all 0.5s;
+        opacity: 0;
+    }
+    .menu-btn:hover::before {
+        opacity: 1;
+        transform: rotate(0deg);
+    }
+    .menu-btn:active {
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+    }
+    .menu-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+    #gameArea {
+        width: 100vw;
+        height: 100vh;
+        position: relative;
+    }
+    #player {
+        width: 30px;
+        height: 30px;
+        background: white;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        transition: all 0.1s linear;
+        box-shadow: 0 0 30px 10px rgba(255, 255, 255, 0.7); /* Increased light around player */
+    }
+    .enemy {
+        width: 40px; /* Increase width */
+        height: 40px; /* Increase height */
+        background: red;
+        position: absolute;
+        transition: all 0.1s linear;
+        box-shadow: 0 0 40px 15px rgba(255, 0, 0, 0.9); /* Enhance light effect */
+    }
+    .special-enemy {
+        width: 40px; /* Increase width */
+        height: 40px; /* Increase height */
+        animation: colorChange 1s infinite;
+        box-shadow: 0 0 60px 25px rgba(255, 165, 0, 0.9); /* Enhance light effect */
+    }
+    @keyframes colorChange {
+        0% { background: red; }
+        50% { background: orange; }
+        100% { background: yellow; }
+    }
+    @keyframes fireExplode {
+        0% { transform: scale(1); opacity: 1; filter: hue-rotate(0deg); }
+        25% { transform: scale(2.5); opacity: 0.5; filter: hue-rotate(60deg); }
+        50% { transform: scale(3); opacity: 0.3; filter: hue-rotate(120deg); }
+        100% { transform: scale(5); opacity: 0; filter: hue-rotate(180deg); }
+    }
+    .exploding {
+        animation: fireExplode 1.5s forwards; /* Use the fire explosion effect */
+    }
+    #score, #pauseBtn {
+        position: fixed;
+        color: white;
+        font-family: Arial, sans-serif;
+        font-size: 24px;
+    }
+    #score {
+        top: 20px;
+        left: 20px;
+    }
+    #pauseBtn {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        width: 50px; /* Adjusted size for better visibility */
+        height: 50px;
+        background: rgba(0, 0, 0, 0.5);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%; /* Changed to a circle for a more modern look */
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        transition: box-shadow 0.3s ease;
+    }
+    #pauseBtn:hover {
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+    }
+    #pauseBtn:active {
+        box-shadow: 0 0 25px rgba(255, 255, 255, 1);
+    }
+    .pause-icon {
+        width: 6px;
+        height: 20px;
+        background: white;
+        margin: 0 2px;
+        border-radius: 2px; /* Rounded edges for a polished appearance */
+    }
+    .play-icon {
+        width: 0;
+        height: 0;
+        border-left: 12px solid white;
+        border-top: 8px solid transparent;
+        border-bottom: 8px solid transparent;
+        display: none; /* Hidden by default */
+    }
+    #countdown {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 72px;
+        z-index: 200;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        background: rgba(0, 0, 0, 0.7);
+        padding: 40px 60px;
+        border-radius: 15px;
+        backdrop-filter: blur(5px);
+        animation: none;
+    }
+    .countdown-number {
+        animation: countdownExplode 1s forwards;
+    }
+    @keyframes countdownExplode {
+        0% { transform: scale(0.5); opacity: 0; }
+        50% { transform: scale(1.5); opacity: 1; }
+        100% { transform: scale(1); opacity: 0; }
+    }
+    #demoGame {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        opacity: 0.3;
+    }
+    #gameOverMenu {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.8);
+        padding: 40px;
+        border-radius: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        text-align: center;
+        z-index: 100;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+        font-family: 'Press Start 2P', cursive; /* Apply the new "cubique" font */
+    }
+    #gameOverMenu h2 {
+        color: white;
+        font-size: 36px;
+        margin-bottom: 20px;
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+    .glitch {
+        animation: glitch 0.5s infinite;
+        filter: blur(1px);
+    }
+    @keyframes glitch {
+        0% { transform: translate(0) }
+        20% { transform: translate(-2px, 2px) }
+        40% { transform: translate(2px, -2px) }
+        60% { transform: translate(-2px, -2px) }
+        80% { transform: translate(2px, 2px) }
+        100% { transform: translate(0) }
+    }
+    /* Styles mis à jour pour le conteneur du joystick */
+    #joystick-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 100px;
+        height: 100px;
+        background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), rgba(0, 0, 0, 0.6));
+        border: none;
+        border-radius: 50%;
+        touch-action: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.3);
+        z-index: 1000;
+        display: none; /* Initially hidden */
+    }
+
+    /* Styles mis à jour pour le joystick */
+    #joystick {
+        width: 50px;
+        height: 50px;
+        background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.4), rgba(200, 200, 200, 0.8));
+        border: none;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        transition: transform 0.1s ease-out, background 0.2s; /* Removed sliding transitions */
+    }
+
+    /* Best Score Styles */
+    #bestScore {
+        opacity: 0;
+        transition: opacity 1s ease-in;
+    }
+
+    #bestScore.show {
+        opacity: 1;
+    }
+
+    /* Menu Button Styles */
+    #returnToMenu {
+        z-index: 1000;
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        padding: 12px 24px;
+        font-size: 18px;
+        border-radius: 5px;
+        color: white;
+        cursor: pointer;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.2s;
+    }
+
+    #returnToMenu:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.5);
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+
+    #pauseBtn {
+        display: none; /* Masquer par défaut */
+    }
+
+    #joystick-container {
+        display: none; /* Masquer par défaut */
+    }
+</style>
+</head>
+<body>
+    <div id="demoGame">
+        <div id="demoPlayer"></div>
+    </div>
+    <div id="countdown">3</div>
+    <div id="menu">
+        <h1>Cube Dodger</h1>
+        <button class="menu-btn" onclick="startGame()">Start Game</button>
+        <p style="color: white; margin-top: 20px; font-family: 'Press Start 2P', cursive;"> <!-- Apply the new "cubique" font -->
+            Use arrow keys to move.<br>
+            Avoid red cubes and special yellow cubes!
+        </p>
+        <p id="bestScore" style="color: white; margin-top: 20px; font-family: 'Press Start 2P', cursive; display: none;">
+            Best Score: <span id="bestScoreValue">0</span>
+        </p>
+    </div>
+    <div id="joystick-container">
+        <div id="joystick"></div>
+    </div>
+    <div id="pauseBtn">
+        <div class="pause-icon left"></div>
+        <div class="pause-icon right"></div>
+        <div class="play-icon"></div>
+    </div>
+    <div id="gameArea" style="display: none;">
+        <div id="player"></div>
+        <div id="score">Score: <span id="scoreValue">0</span></div>
+    </div>
+    <div id="gameOverMenu">
+        <h2>Game Over!</h2>
+        <p style="color: white; font-size: 24px; font-family: 'Press Start 2P', cursive;">Final Score: <span id="finalScore">0</span></p> <!-- Apply the new "cubique" font -->
+        <button class="menu-btn" onclick="restartGame()">Play Again</button>
+    </div>
+
+<script>
+const player = document.getElementById('player');
+const gameArea = document.getElementById('gameArea');
+const scoreElement = document.getElementById('scoreValue');
+const menu = document.getElementById('menu');
+const demoPlayer = document.getElementById('demoPlayer');
+const gameOverMenu = document.getElementById('gameOverMenu');
+const finalScoreElement = document.getElementById('finalScore');
+const joystick = document.getElementById('joystick');
+const joystickContainer = document.getElementById('joystick-container');
+const pauseBtn = document.getElementById('pauseBtn'); // Select the pause button element
+let joystickActive = false;
+let joystickPos = { x: 0, y: 0 };
+
+let score = 0;
+let enemies = [];
+let demoEnemies = [];
+let playerPos = { x: window.innerWidth/2, y: window.innerHeight/2 };
+let demoPlayerPos = { x: window.innerWidth/2, y: window.innerHeight/2 };
+let isGameOver = false;
+let enemyCount = 0;
+let isPaused = false; // Changed to false to remove initial pause
+let isCountingDown = false; // Add a new flag to track if a countdown is active
+
+let keys = {
+    ArrowUp: false,
+    ArrowDown: false,
+    ArrowLeft: false,
+    ArrowRight: false
+};
+
+// Increase all enemies' speed slightly
+const ENEMY_SPEED = 2; // Increased from 1.5 to 2 for faster gameplay
+const PLAYER_SPEED = 3; // Maintain the same player speed for balance
+
+// Modify the movePlayer function to use a constant speed
+function movePlayer() {
+    if (keys.ArrowUp && playerPos.y > 0) playerPos.y -= PLAYER_SPEED;
+    if (keys.ArrowDown && playerPos.y < window.innerHeight - 30) playerPos.y += PLAYER_SPEED;
+    if (keys.ArrowLeft && playerPos.x > 0) playerPos.x -= PLAYER_SPEED;
+    if (keys.ArrowRight && playerPos.x < window.innerWidth - 30) playerPos.x += PLAYER_SPEED;
+
+    player.style.left = playerPos.x + 'px';
+    player.style.top = playerPos.y + 'px';
+}
+
+function startGame() {
+    demoEnemies.forEach(enemy => enemy.element.remove());
+    demoEnemies = [];
+    
+    menu.style.display = 'none';
+    gameOverMenu.style.display = 'none';
+    gameArea.style.display = 'block';
+    
+    // Show joystick and pause button once game starts
+    joystickContainer.style.display = 'flex';
+    pauseBtn.style.display = 'flex';
+    
+    // Reset pause state and re-add event listener
+    isPaused = false;
+    isGameOver = false;
+    
+    // Reset enemy count
+    enemyCount = 0; // Resetting enemyCount
+    
+    // Ensure score is reset
+    score = 0;
+    scoreElement.textContent = score;
+    
+    // Re-add pause button functionality
+    pauseBtn.addEventListener('click', togglePause);
+    
+    requestAnimationFrame(gameLoop);
+}
+
+function restartGame() {
+    gameOverMenu.style.display = 'none';
+    score = 0;
+    scoreElement.textContent = score;
+    
+    playerPos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    player.style.left = playerPos.x + 'px';
+    player.style.top = playerPos.y + 'px';
+    
+    // Clean up enemies
+    enemies.forEach(enemy => enemy.element.remove());
+    enemies = [];
+    
+    // Reset enemy count
+    enemyCount = 0; // Resetting enemyCount
+    
+    // Remove menu button if it exists
+    const menuBtn = document.getElementById('returnToMenu');
+    if (menuBtn) menuBtn.remove();
+    
+    // Hide everything and show menu
+    joystickContainer.style.display = 'none';
+    pauseBtn.style.display = 'none';
+    gameArea.style.display = 'none';
+    menu.style.display = 'block';
+    
+    // Display best score
+    displayBestScore();
+}
+
+let gameLoopRunning = false; // Flag to prevent multiple game loops
+
+// Modify the gameLoop function to increase the spawn rate
+function gameLoop() {
+    if (isGameOver || isPaused) {
+        gameLoopRunning = false; // Reset the flag if the loop is stopped
+        return;
+    }
+
+    if (!gameLoopRunning) {
+        gameLoopRunning = true; // Set the flag to prevent multiple loops
+    }
+
+    movePlayer();
+    updateEnemies();
+    
+    // Increase the spawn rate significantly
+    const increasedSpawnRate = 0.02; // Increased from 0.005
+    if (Math.random() < increasedSpawnRate) {
+        enemies.push(createEnemy());
+    }    
+
+    requestAnimationFrame(gameLoop);
+}
+
+function togglePause() {
+    isPaused = !isPaused;
+    
+    if (isPaused) {
+        // Create and show menu button
+        if (!document.getElementById('returnToMenu')) {
+            const menuBtn = document.createElement('button');
+            menuBtn.id = 'returnToMenu';
+            menuBtn.className = 'menu-btn';
+            menuBtn.textContent = 'Main Menu';
+            menuBtn.style.position = 'fixed';
+            menuBtn.style.top = '50%';
+            menuBtn.style.left = '50%';
+            menuBtn.style.transform = 'translate(-50%, -50%)';
+            menuBtn.onclick = () => {
+                // Clean up pause state
+                document.getElementById('returnToMenu').remove();
+                isPaused = false;
+                
+                // Return to menu
+                restartGame();
+            };
+            document.body.appendChild(menuBtn);
+        }
+        
+        // Hide pause icons and show play icon
+        document.querySelectorAll('.pause-icon').forEach(icon => icon.style.display = 'none');
+        document.querySelector('.play-icon').style.display = 'block';
+    } else {
+        // Remove menu button if exists
+        const menuBtn = document.getElementById('returnToMenu');
+        if (menuBtn) menuBtn.remove();
+        
+        // Show pause icons and hide play icon
+        document.querySelectorAll('.pause-icon').forEach(icon => icon.style.display = 'block');
+        document.querySelector('.play-icon').style.display = 'none';
+        
+        startCountdown();
+    }
+}
+
+// Modify the startCountdown function
+function startCountdown() {
+    if (isCountingDown) return; // Prevent multiple countdowns
+    isCountingDown = true;
+    isPaused = true; // Pause the game during countdown
+
+    const countdownEl = document.getElementById('countdown');
+    countdownEl.style.display = 'block';
+    let count = 3;
+    
+    function showNumber() {
+        countdownEl.textContent = count;
+        countdownEl.className = 'countdown-number';
+        
+        setTimeout(() => {
+            count--;
+            if (count > 0) {
+                showNumber();
+            } else {
+                countdownEl.style.display = 'none';
+                isPaused = false; // Resume the game after countdown
+                isCountingDown = false;
+                gameLoop(); // Restart the game loop
+            }
+        }, 1000);
+    }
+    
+    showNumber();
+}
+
+document.querySelectorAll('.menu-btn').forEach(button => {
+    button.addEventListener('click', (e) => {
+        e.preventDefault();
+        startGame();
+    });
+});
+
+pauseBtn.addEventListener('click', togglePause); // Add event listener to the pause button
+
+document.addEventListener('keydown', (e) => {
+    if (keys.hasOwnProperty(e.key)) {
+        keys[e.key] = true;
+    }
+});
+
+document.addEventListener('keyup', (e) => {
+    if (keys.hasOwnProperty(e.key)) {
+        keys[e.key] = false;
+    }
+});
+
+// Replace the createEnemy function with this updated version
+function createEnemy(isDemo = false) {
+    enemyCount++;
+    const enemy = document.createElement('div');
+    enemy.className = 'enemy';
+    if (enemyCount % 15 === 0) {
+        enemy.classList.add('special-enemy');
+    }
+    
+    const side = Math.floor(Math.random() * 4);
+    let x, y;
+    
+    switch(side) {
+        case 0: x = Math.random() * window.innerWidth; y = -30; break;
+        case 1: x = window.innerWidth + 30; y = Math.random() * window.innerHeight; break;
+        case 2: x = Math.random() * window.innerWidth; y = window.innerHeight + 30; break;
+        case 3: x = -30; y = Math.random() * window.innerHeight; break;
+    }
+    
+    enemy.style.left = x + 'px';
+    enemy.style.top = y + 'px';
+    gameArea.appendChild(enemy);
+
+    const angle = Math.atan2(playerPos.y - y, playerPos.x - x);
+    const velocity = {
+        x: Math.cos(angle) * ENEMY_SPEED,
+        y: Math.sin(angle) * ENEMY_SPEED
+    };
+    
+    return { 
+        element: enemy, 
+        x, 
+        y, 
+        velocity, 
+        isSpecial: enemy.classList.contains('special-enemy')
+    };
+}
+
+function updateEnemies() {
+    for (let i = enemies.length - 1; i >= 0; i--) {
+        const enemy = enemies[i];
+        enemy.x += enemy.velocity.x;
+        enemy.y += enemy.velocity.y;
+        
+        enemy.element.style.left = enemy.x + 'px';
+        enemy.element.style.top = enemy.y + 'px';
+        
+        if (enemy.isSpecial) {
+            const distance = Math.hypot(playerPos.x - enemy.x, playerPos.y - enemy.y);
+            if (distance < 150 && !enemy.element.classList.contains('exploding')) {
+                gameOver();
+                return;
+            }
+            if (distance < 250 && !enemy.element.classList.contains('exploding')) {
+                enemy.element.classList.add('exploding');
+                setTimeout(() => {
+                    if (enemy.element.parentNode) {
+                        enemy.element.remove();
+                        enemies.splice(i, 1);
+                    }
+                }, 1500);
+            }
+        } else if (checkCollision(enemy)) {
+            gameOver();
+            return;
+        }
+        
+        if (enemy.x < -50 || enemy.x > window.innerWidth + 50 || 
+            enemy.y < -50 || enemy.y > window.innerHeight + 50) {
+            enemy.element.remove();
+            enemies.splice(i, 1);
+            score += 1;
+            scoreElement.textContent = score;
+        }
+    }
+}
+
+// Find and replace the entire gameLoop function with this updated version
+function gameLoop() {
+    if (isGameOver || isPaused) {
+        gameLoopRunning = false; // Reset the flag if the loop is stopped
+        return;
+    }
+
+    if (!gameLoopRunning) {
+        gameLoopRunning = true; // Set the flag to prevent multiple loops
+    }
+
+    movePlayer();
+    updateEnemies();
+    
+    // Increase the spawn rate significantly
+    const increasedSpawnRate = 0.02; // Increased from 0.005
+    if (Math.random() < increasedSpawnRate) {
+        enemies.push(createEnemy());
+    }    
+
+    requestAnimationFrame(gameLoop);
+}
+
+function checkCollision(enemy) {
+    const playerRect = player.getBoundingClientRect();
+    const enemyRect = enemy.element.getBoundingClientRect();
+    
+    // Add 5px buffer to prevent false collisions
+    return !(playerRect.right - 5 < enemyRect.left || 
+             playerRect.left + 5 > enemyRect.right || 
+             playerRect.bottom - 5 < enemyRect.top || 
+             playerRect.top + 5 > enemyRect.bottom);
+}
+
+function gameOver() {
+    isGameOver = true;
+    finalScoreElement.textContent = score;
+    gameOverMenu.style.display = 'block';
+    
+    // Hide the pause button and joystick
+    pauseBtn.style.display = 'none';
+    joystickContainer.style.display = 'none';
+    
+    // Hide the countdown if it's visible
+    const countdownEl = document.getElementById('countdown');
+    countdownEl.style.display = 'none';
+    
+    // Save and update the best score
+    let bestScore = localStorage.getItem('bestScore') || 0;
+    if (score > bestScore) {
+        bestScore = score;
+        localStorage.setItem('bestScore', bestScore);
+    }
+    document.getElementById('bestScoreValue').textContent = bestScore;
+    document.getElementById('bestScore').classList.add('show');
+    
+    // Disable pause functionality after game over
+    pauseBtn.removeEventListener('click', togglePause);
+}
+
+function startDemoGame() {
+    demoGameLoop();
+}
+
+function demoGameLoop() {
+    if (!menu.style.display || menu.style.display !== 'none') {
+        // Move demo player randomly
+        if (Math.random() < 0.05) {
+            demoPlayerPos.x += (Math.random() - 0.5) * 100;
+            demoPlayerPos.y += (Math.random() - 0.5) * 100;
+            
+            // Keep within bounds
+            demoPlayerPos.x = Math.max(0, Math.min(window.innerWidth - 30, demoPlayerPos.x));
+            demoPlayerPos.y = Math.max(0, Math.min(window.innerHeight - 30, demoPlayerPos.y));
+            
+            demoPlayer.style.left = demoPlayerPos.x + 'px';
+            demoPlayer.style.top = demoPlayerPos.y + 'px';
+        }
+
+        // Create and update demo enemies
+        if (Math.random() < 0.02) {
+            demoEnemies.push(createEnemy(true));
+        }
+        
+        updateDemoEnemies();
+        requestAnimationFrame(demoGameLoop);
+    }
+}
+
+function updateDemoEnemies() {
+    for (let i = demoEnemies.length - 1; i >= 0; i--) {
+        const enemy = demoEnemies[i];
+        enemy.x += enemy.velocity.x;
+        enemy.y += enemy.velocity.y;
+        
+        enemy.element.style.left = enemy.x + 'px';
+        enemy.element.style.top = enemy.y + 'px';
+        
+        if (!enemy.isStationary && (enemy.x < -50 || enemy.x > window.innerWidth + 50 || 
+            enemy.y < -50 || enemy.y > window.innerHeight + 50)) {
+            enemy.element.remove();
+            demoEnemies.splice(i, 1);
+        }
+    }
+}
+
+// Joystick initialization
+function initJoystick() {
+    let dragging = false;
+    let startX = 0;
+    let startY = 0;
+    const maxDistance = 40; // Distance maximale pour déplacer le joystick
+
+    // Activation du joystick au début du drag
+    joystickContainer.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        dragging = true;
+        const rect = joystickContainer.getBoundingClientRect();
+        startX = e.clientX - rect.left;
+        startY = e.clientY - rect.top;
+    });
+
+    // Gestion du mouvement du joystick
+    window.addEventListener('pointermove', (e) => {
+        if (!dragging) return;
+        const rect = joystickContainer.getBoundingClientRect();
+        let deltaX = e.clientX - rect.left - startX;
+        let deltaY = e.clientY - rect.top - startY;
+
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            deltaY = 0; // Prioritize horizontal movement
+        } else {
+            deltaX = 0; // Prioritize vertical movement
+        }
+
+        const distance = Math.hypot(deltaX, deltaY);
+        if (distance > maxDistance) {
+            const angle = Math.atan2(deltaY, deltaX);
+            deltaX = Math.cos(angle) * maxDistance;
+            deltaY = Math.sin(angle) * maxDistance;
+        }
+
+        joystick.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+
+        // Update keys for four cardinal directions movement
+        keys.ArrowLeft = deltaX < -10;
+        keys.ArrowRight = deltaX > 10;
+        keys.ArrowUp = deltaY < -10;
+        keys.ArrowDown = deltaY > 10;
+    });
+
+    // Réinitialisation du joystick à la fin du drag
+    window.addEventListener('pointerup', () => {
+        if (dragging) {
+            dragging = false;
+            joystick.style.transform = 'translate(0, 0)';
+            keys.ArrowLeft = keys.ArrowRight = keys.ArrowUp = keys.ArrowDown = false;
+        }
+    });
+}
+
+// Display Best Score in the Main Menu
+function displayBestScore() {
+    let bestScore = localStorage.getItem('bestScore') || 0;
+    document.getElementById('bestScoreValue').textContent = bestScore;
+    const bestScoreEl = document.getElementById('bestScore');
+    bestScoreEl.style.display = 'block';
+    // Trigger the fade-in effect
+    setTimeout(() => {
+        bestScoreEl.classList.add('show');
+    }, 100);
+}
+
+// Start demo game when page loads
+window.onload = function() {
+    // Make sure pause button and joystick are hidden initially
+    pauseBtn.style.display = 'none';
+    joystickContainer.style.display = 'none';
+    
+    // Clear any leftover enemies
+    enemies.forEach(enemy => enemy.element.remove());
+    enemies = [];
+    demoEnemies.forEach(enemy => enemy.element.remove());
+    demoEnemies = [];
+    
+    displayBestScore();
+    initJoystick();
+    startDemoGame();
+};
+</script>
+</body></html>
