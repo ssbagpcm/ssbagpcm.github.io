@@ -1,6 +1,7 @@
 
 <html><head><base href="." />
 <title>Cube Dodger</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <style>
     body {
@@ -9,6 +10,7 @@
         background: #000;
         font-family: Arial, sans-serif;
         user-select: none; /* Disable text selection across the site */
+        font-size: 16px; /* Ensure a base font size for mobile compatibility */
     }
     #menu {
         position: fixed;
@@ -293,6 +295,32 @@
 
     #joystick-container {
         display: none; /* Masquer par défaut */
+    }
+
+    /* Add media queries for better responsiveness on smaller devices */
+    @media (max-width: 600px) {
+        #menu h1 {
+            font-size: 32px; /* Adjust font size for smaller screens */
+        }
+        .menu-btn {
+            font-size: 16px; /* Adjust buttons for smaller screens */
+        }
+        #score, #pauseBtn {
+            font-size: 20px; /* Resize score and button for better visibility */
+        }
+        #countdown {
+            font-size: 48px; /* Adjust countdown size */
+        }
+        #gameOverMenu h2, #gameOverMenu p {
+            font-size: 24px; /* Adjust game over menu text size */
+        }
+        /* Game objects can also be resized if necessary */
+        #player,
+        .enemy,
+        .special-enemy {
+            width: 25px;
+            height: 25px;
+        }
     }
 </style>
 </head>
