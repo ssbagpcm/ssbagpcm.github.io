@@ -1,0 +1,1458 @@
+<html><head><base href=".">
+<style>
+  * {
+    user-select: none;
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer */
+    font-family: 'Lacquer', cursive;
+  }
+
+  body {
+    margin: 0;
+    overflow: hidden;
+    font-family: 'Lacquer', cursive;
+  }
+
+  @font-face {
+    font-family: 'Lacquer';
+    src: url('https://fonts.googleapis.com/css2?family=Lacquer&family=Indie+Flower&family=Raleway:wght@400;700&display=swap');
+  }
+
+  #info {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: white;
+    font-family: 'Raleway', sans-serif;
+    background: rgba(0,0,0,0.5);
+    padding: 10px;
+    border-radius: 5px;
+  }
+  #vhs-overlay {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    color: rgba(255, 255, 255, 0.8);
+    font-family: 'Raleway', monospace;
+    font-size: 14px;
+    text-transform: uppercase;
+    text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    z-index: 1000;
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+
+  #vhs-overlay div {
+    margin: 4px 0;
+  }
+
+  .vhs-blink {
+    animation: blink 2s infinite;
+  }
+
+  @keyframes blink {
+    0%, 49% { opacity: 1 }
+    50%, 100% { opacity: 0 }
+  }
+
+  #game-ui {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: white;
+    font-family: 'Lacquer', cursive;
+    font-size: 1.5em;
+    background: rgba(0,0,0,0.5);
+    padding: 10px;
+    border-radius: 5px;
+  }
+
+  #jumpscare {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1001;
+  }
+
+  #jumpscare img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  #win-screen {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.9);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    z-index: 1002;
+  }
+
+  #menu-overlay, #death-menu {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Lacquer', cursive;
+  }
+
+  #menu-overlay h1, #death-menu h1 {
+    color: white;
+    font-size: 4em;
+    text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5);
+    margin-bottom: 30px;
+  }
+
+  .menu-button {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border: 2px solid white;
+    padding: 15px 30px;
+    font-size: 1.5em;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: 'Lacquer', cursive;
+    margin: 10px;
+  }
+
+  .menu-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1.1);
+  }
+
+  #game-timer {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-family: 'Lacquer', cursive;
+    font-size: 2em;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 1000;
+  }
+
+  #game-over {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: #00f;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    z-index: 2001;
+  }
+
+  #joystick-container {
+    position: fixed;
+    bottom: 30px; 
+    left: 30px;   
+    width: 100px; 
+    height: 100px; 
+    background: rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    touch-action: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+  }
+
+  #joystick-svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  #joystick-knob {
+    transition: transform 0.1s ease;
+  }
+
+  #touch-area {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 50%;
+    height: 100%;
+    touch-action: none;
+    z-index: 1999;
+  }
+
+  .crystal-indicator {
+    position: fixed;
+    width: 30px;
+    height: 30px;
+    pointer-events: none;
+    z-index: 1998;
+    opacity: 0.8;
+    display: none;
+  }
+
+  #death-menu h1 {
+    color: white;
+    text-shadow: none;
+  }
+
+  #death-menu p {
+    color: white;
+  }
+
+  .death-button {
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border: 2px solid white;
+  }
+
+  .death-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  @media (max-width: 768px) {
+    #joystick-container,
+    #touch-area,
+    .crystal-indicator {
+      display: block;
+    }
+    
+    #game-ui {
+      font-size: 1.2em;
+    }
+    
+    #vhs-overlay {
+      font-size: 12px;
+    }
+    
+    .menu-button {
+      padding: 12px 24px;
+    }
+  }
+</style>
+<script id="firefly-vertex" type="x-shader/x-vertex">
+varying vec3 vPosition;
+void main() {
+    vPosition = position;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    gl_PointSize = 3.0;
+}
+</script>
+
+<script id="firefly-fragment" type="x-shader/x-fragment">
+varying vec3 vPosition;
+void main() {
+    vec2 center = gl_PointCoord - 0.5;
+    float dist = length(center);
+    float alpha = 1.0 - smoothstep(0.3, 0.5, dist);
+    gl_FragColor = vec4(1.0, 1.0, 0.6, alpha);
+}
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+
+<script id="vhs-vertex" type="x-shader/x-vertex">
+varying vec2 vUv;
+void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+</script>
+
+<script id="vhs-fragment" type="x-shader/x-shader/x-fragment">
+uniform float time;
+uniform sampler2D tDiffuse;
+uniform float rgbShift;
+varying vec2 vUv;
+
+float random(vec2 c){
+    return fract(sin(dot(c.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+
+void main() {
+    vec2 uv = vUv;
+    
+    float tracking = time * 0.1;
+    float y = mod(uv.y * 0.5 + tracking, 1.0);
+    float distortion = sin(y * 10.0 + time) * 0.003;
+    uv.x += distortion;
+
+    vec4 redChannel = texture2D(tDiffuse, uv + vec2(0.002 + rgbShift, 0.0));
+    vec4 greenChannel = texture2D(tDiffuse, uv);
+    vec4 blueChannel = texture2D(tDiffuse, uv - vec2(0.002 + rgbShift, 0.0));
+
+    float scanline = sin(uv.y * 800.0) * 0.04;
+    vec4 color = vec4(redChannel.r, greenChannel.g, blueChannel.b, 1.0);
+    color.rgb -= scanline;
+
+    float noise = random(uv + time * 0.1) * 0.1;
+    color.rgb += noise;
+
+    float bleed = sin(uv.y * 400.0 + time) * 0.01;
+    color.rgb += vec3(bleed);
+
+    gl_FragColor = color;
+}
+</script>
+</head>
+<body>
+<div id="vhs-overlay">
+  <div>PLAY</div>
+  <div>SP</div>
+  <div class="vhs-blink">TRACKING</div>
+  <div id="vhs-counter">0:00:00</div>
+</div>
+
+<div id="game-ui" style="display: none;">
+  Crystals: <span id="crystal-counter">0/20</span>
+</div>
+
+<div id="game-timer" style="display: none;">10:00</div>
+
+<div id="jumpscare">
+  <img alt="distorted face jumpscare" src="noFilter.png">
+</div>
+
+<div id="win-screen">
+  <h2>YOU ESCAPED</h2>
+  <p>But at what cost...?</p>
+  <button onclick="location.reload()" style="padding: 10px 20px; margin-top: 10px;">Play Again</button>
+</div>
+
+<div id="menu-overlay">
+  <h1>FOREST NIGHTMARE</h1>
+  <button class="menu-button" onclick="startGame()">START GAME</button>
+  <button class="menu-button" onclick="showInstructions()">INSTRUCTIONS</button>
+</div>
+
+<div id="game-over">
+  <h2>GAME OVER</h2>
+  <p id="game-over-reason"></p>
+  <button class="menu-button" onclick="location.reload()">TRY AGAIN</button>
+</div>
+
+<div id="death-menu" style="display: none;">
+  <h1>YOU DIED</h1>
+  <p>Your soul has been consumed by darkness...</p>
+  <button class="death-button" onclick="retryGame()">TRY AGAIN</button>
+  <button class="death-button" onclick="returnToMenu()">MAIN MENU</button>
+</div>
+
+<!-- Joystick Container -->
+<div id="joystick-container">
+  <svg id="joystick-svg" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="45" stroke="rgba(255, 255, 255, 0.5)" stroke-width="5" fill="none"/>
+    <circle id="joystick-knob" cx="50" cy="50" r="20" fill="rgba(255, 255, 255, 0.8)" />
+  </svg>
+</div>
+<!-- Touch Area for Look Controls -->
+<div id="touch-area"></div>
+
+<svg class="crystal-indicator" viewBox="0 0 24 24">
+  <path fill="cyan" d="M12 2L1 21h22L12 2zm0 3.84L19.36 19H4.64L12 5.84z"/>
+</svg>
+
+<script>
+  const FLASHLIGHT_INTENSITY = 2.5; // Reduced intensity for more focused beam
+  const FLASHLIGHT_DISTANCE = 60; // Slightly increased distance
+  const FLASHLIGHT_ANGLE = Math.PI / 6; // Narrower angle for more focused beam
+
+  const FLASHLIGHT_FLICKER_CHANCE = 0.005; // Chance of flickering each frame
+  const FLICKER_DURATION_MIN = 50; // Minimum flicker duration in ms 
+  const FLICKER_DURATION_MAX = 200; // Maximum flicker duration in ms
+
+  const FIREFLY_COUNT = 200; // Number of fireflies to generate 
+  const FIREFLY_RADIUS = 100; // Radius within which fireflies can spawn
+  const CRYSTAL_COUNT = 20; // Number of crystals to collect
+  const CRYSTAL_SPAWN_RADIUS = 100; // Maximum radius for crystal spawning
+  const ENTITY_HEIGHT = 15; // Height of the enemy entities
+  const JUMPSCARE_DISTANCE = 5; // Distance at which jumpscare triggers
+
+  // Update constants for entity behavior
+  const DETECTION_RADIUS = 30; // Increased from 15 to 30 meters
+  const CHASE_SPEED = 0.2; // Increased from 0.1
+  const GAME_TIME = 600; // 10 minutes in seconds
+  let timeRemaining = GAME_TIME;
+  let gameTimer;
+
+  // Game state variables
+  let gameStarted = false;
+  let crystalsCollected = 0;
+  const crystals = new Set();
+  const entities = new Set();
+  let mouseX = 0;
+  let mouseY = 0;
+  let joystickActive = false;
+  let joystickDistance = 0;
+  const joystickMaxDistance = 40;
+
+  // Joystick variables 
+  let joystickStartX = 0;
+  let joystickStartY = 0;
+  let joystickAngle = 0;
+
+  // Touch area variables
+  let touchStartX = 0;
+  let touchStartY = 0;
+
+  // Initialize camera before any usage
+  const camera = new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+  );
+
+  function findSafeSpawnPosition() {
+      const MIN_DISTANCE_FROM_OBJECTS = 10;
+      let attempts = 0;
+      const MAX_ATTEMPTS = 100;
+      
+      while (attempts < MAX_ATTEMPTS) {
+          // Try a random position within a reasonable radius from center
+          const x = (Math.random() - 0.5) * 40; // 40 units radius
+          const z = (Math.random() - 0.5) * 40;
+          
+          // Check distance from trees
+          let isSafe = true;
+          scene.traverseVisible(object => {
+              if (object instanceof THREE.Mesh) {
+                  // Skip ground and sky checks
+                  if (object === ground || object === sky) return;
+                  
+                  const dx = object.position.x - x;
+                  const dz = object.position.z - z;
+                  const distanceSquared = dx * dx + dz * dz;
+                  
+                  if (distanceSquared < MIN_DISTANCE_FROM_OBJECTS * MIN_DISTANCE_FROM_OBJECTS) {
+                      isSafe = false;
+                  }
+              }
+          });
+          
+          if (isSafe) {
+              return { x, z };
+          }
+          
+          attempts++;
+      }
+      
+      // If no safe position found after max attempts, return a default position
+      console.warn('Could not find safe spawn position, using default');
+      return { x: 0, z: 0 };
+  }
+
+  function isInMenu() {
+      return document.getElementById('menu-overlay').style.display === 'flex' ||
+             document.getElementById('death-menu').style.display === 'flex' ||
+             document.getElementById('game-over').style.display === 'block' ||
+             document.getElementById('win-screen').style.display === 'block';
+  }
+
+  const scene = new THREE.Scene();
+
+  const skyGeometry = new THREE.SphereGeometry(500, 32, 32);
+  const skyMaterial = new THREE.MeshBasicMaterial({
+      color: 0x001133,
+      side: THREE.BackSide
+  });
+  const sky = new THREE.Mesh(skyGeometry, skyMaterial);
+  scene.add(sky);
+
+  const groundGeometry = new THREE.PlaneGeometry(1000, 1000);
+  const textureLoader = new THREE.TextureLoader();
+  const groundTexture = textureLoader.load('Grass_005_BaseColor (1).jpg');
+  groundTexture.wrapS = THREE.RepeatWrapping;
+  groundTexture.wrapT = THREE.RepeatWrapping;
+  groundTexture.repeat.set(50, 50);
+  const groundMaterial = new THREE.MeshStandardMaterial({ 
+      map: groundTexture,
+      roughness: 0.8,
+      metalness: 0.2
+  });
+  const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+  ground.rotation.x = -Math.PI / 2;
+  ground.position.y = 0;
+  ground.receiveShadow = true; // Enable shadow receiving
+  scene.add(ground);
+
+  // Create flashlight after camera initialization
+  const flashlight = new THREE.SpotLight(0xffffff, FLASHLIGHT_INTENSITY);
+  flashlight.position.set(0, 4.5, 0); // Position relative to camera
+  flashlight.angle = FLASHLIGHT_ANGLE;
+  flashlight.penumbra = 0.2;
+  flashlight.decay = 1;
+  flashlight.distance = FLASHLIGHT_DISTANCE;
+  flashlight.castShadow = true;
+  flashlight.shadow.mapSize.width = 1024;
+  flashlight.shadow.mapSize.height = 1024;
+  flashlight.shadow.camera.near = 0.5;
+  flashlight.shadow.camera.far = FLASHLIGHT_DISTANCE;
+  flashlight.shadow.focus = 1;
+
+  camera.add(flashlight);
+  scene.add(camera);
+
+  let isFlickering = false;
+  let flickerTimeout = null;
+  let originalIntensity = null;
+
+  function updateFlashlight() {
+      if (!gameStarted || isInMenu()) return;
+      
+      // Get camera's direction vector
+      const cameraDirection = new THREE.Vector3();
+      camera.getWorldDirection(cameraDirection);
+      
+      // Position flashlight at camera position (player's head)
+      flashlight.position.set(
+          camera.position.x,
+          camera.position.y,
+          camera.position.z
+      );
+
+      // Point flashlight in camera's looking direction
+      flashlight.target.position.set(
+          camera.position.x + cameraDirection.x * 10,
+          camera.position.y + cameraDirection.y * 10,
+          camera.position.z + cameraDirection.z * 10
+      );
+      flashlight.target.updateMatrixWorld();
+
+      // Random chance to start flickering if not already flickering
+      if (!isFlickering && Math.random() < FLASHLIGHT_FLICKER_CHANCE) {
+          startFlicker();
+      }
+  }
+
+  function startFlicker() {
+      if (isFlickering) return;
+      isFlickering = true;
+      originalIntensity = flashlight.intensity;
+
+      // Create a series of flickers
+      const flickers = Math.floor(Math.random() * 3) + 2; // 2-4 flickers
+      let totalDelay = 0;
+
+      for (let i = 0; i < flickers; i++) {
+          // Schedule intensity changes
+          setTimeout(() => {
+              flashlight.intensity = Math.random() * 0.5;
+              // Add crackling sound
+              playCracklingSound();
+          }, totalDelay);
+
+          totalDelay += Math.random() * (FLICKER_DURATION_MAX - FLICKER_DURATION_MIN) + FLICKER_DURATION_MIN;
+
+          setTimeout(() => {
+              flashlight.intensity = originalIntensity;
+          }, totalDelay);
+      }
+
+      // Reset after all flickers
+      setTimeout(() => {
+          flashlight.intensity = originalIntensity;
+          isFlickering = false;
+      }, totalDelay);
+  }
+
+  function playCracklingSound() {
+      // Create a quick electrical crackling sound
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.type = 'sawtooth';
+      oscillator.frequency.setValueAtTime(100, audioContext.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(
+          1000, 
+          audioContext.currentTime + 0.1
+      );
+
+      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(
+          0.01,
+          audioContext.currentTime + 0.1
+      );
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      oscillator.start();
+      oscillator.stop(audioContext.currentTime + 0.1);
+  }
+
+  function createTree(x, z) {
+      const treeGroup = new THREE.Group();
+      
+      // Make trunk much taller and wider
+      const trunkGeometry = new THREE.CylinderGeometry(2, 3, 30, 8);
+      const trunkTexture = textureLoader.load('Bark_007_BaseColor.jpg');
+      trunkTexture.wrapS = THREE.RepeatWrapping;
+      trunkTexture.wrapT = THREE.RepeatWrapping;
+      trunkTexture.repeat.set(4, 8); // More texture repetition for detail
+      const trunkMaterial = new THREE.MeshStandardMaterial({ 
+          map: trunkTexture,
+          normalScale: new THREE.Vector2(2, 2) // Enhanced normal mapping
+      });
+      const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+      trunk.position.y = 15;
+      trunk.castShadow = true; // Enable shadow casting
+      trunk.receiveShadow = true; // Enable shadow receiving
+      treeGroup.add(trunk);
+      
+      // Make leaves larger and more ethereal
+      const leavesGeometry = new THREE.ConeGeometry(8, 20, 8);
+      const leavesTexture = textureLoader.load('Stylized_Leaves_001_basecolor.jpg');
+      const leavesMaterial = new THREE.MeshStandardMaterial({ 
+          map: leavesTexture,
+          transparent: true,
+          opacity: 0.8,
+          emissive: new THREE.Color(0x223344), // Add slight glow
+          emissiveIntensity: 0.2
+      });
+      
+      const leaves1 = new THREE.Mesh(leavesGeometry, leavesMaterial);
+      leaves1.position.y = 35;
+      leaves1.castShadow = true; // Enable shadow casting
+      leaves1.receiveShadow = true; // Enable shadow receiving
+      treeGroup.add(leaves1);
+      
+      const leaves2 = new THREE.Mesh(leavesGeometry, leavesMaterial);
+      leaves2.position.y = 45;
+      leaves2.scale.set(0.8, 0.8, 0.8);
+      leaves2.castShadow = true; // Enable shadow casting
+      leaves2.receiveShadow = true; // Enable shadow receiving
+      treeGroup.add(leaves2);
+      
+      // Add some floating particles around the tree
+      const particleGeometry = new THREE.BufferGeometry();
+      const particleCount = 50;
+      const positions = new Float32Array(particleCount * 3);
+      
+      for(let i = 0; i < particleCount * 3; i += 3) {
+          const angle = Math.random() * Math.PI * 2;
+          const radius = Math.random() * 10;
+          positions[i] = Math.cos(angle) * radius;
+          positions[i + 1] = Math.random() * 40 + 20;
+          positions[i + 2] = Math.sin(angle) * radius;
+      }
+      
+      particleGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+      const particleMaterial = new THREE.PointsMaterial({
+          color: 0x88aaff,
+          size: 0.2,
+          transparent: true,
+          opacity: 0.6
+      });
+      
+      const particles = new THREE.Points(particleGeometry, particleMaterial);
+      treeGroup.add(particles);
+      
+      treeGroup.position.set(x, 0, z);
+      return treeGroup;
+  }
+
+  for (let i = 0; i < 150; i++) { // Increased tree count
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 30 + Math.random() * 270; // Increased radius
+      const x = Math.cos(angle) * radius;
+      const z = Math.sin(angle) * radius;
+      
+      const tree = createTree(x, z);
+      scene.add(tree);
+  }
+
+  const ambientLight = new THREE.AmbientLight(0x404040, 0.1); // Reduced ambient light
+  scene.add(ambientLight);
+
+  const moonLight = new THREE.DirectionalLight(0x6666ff, 0.3); // Reduced moon light
+  moonLight.position.set(50, 100, 50);
+  moonLight.castShadow = true; // Enable shadow casting
+  moonLight.shadow.mapSize.width = 1024;
+  moonLight.shadow.mapSize.height = 1024;
+  scene.add(moonLight);
+
+  scene.fog = new THREE.FogExp2(0x001133, 0.008); // Increased fog density
+
+  // Add some floating particles in the sky
+  const skyParticles = new THREE.BufferGeometry();
+  const skyParticleCount = 1000;
+  const skyParticlePositions = new Float32Array(skyParticleCount * 3);
+
+  for(let i = 0; i < skyParticleCount * 3; i += 3) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 50 + Math.random() * 150;
+      const height = Math.random() * 100 + 20;
+      skyParticlePositions[i] = Math.cos(angle) * radius;
+      skyParticlePositions[i + 1] = height;
+      skyParticlePositions[i + 2] = Math.sin(angle) * radius;
+  }
+
+  skyParticles.setAttribute('position', new THREE.Float32BufferAttribute(skyParticlePositions, 3));
+  const skyParticleMaterial = new THREE.PointsMaterial({
+      color: 0x4466ff,
+      size: 0.3,
+      transparent: true,
+      opacity: 0.6
+  });
+
+  const skyParticleSystem = new THREE.Points(skyParticles, skyParticleMaterial);
+  scene.add(skyParticleSystem);
+
+  // Add pulsing ambient light for atmosphere
+  const pulsingLight = new THREE.AmbientLight(0x001133);
+  scene.add(pulsingLight);
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  
+  // Enable shadow mapping on renderer
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+  document.body.appendChild(renderer.domElement);
+
+  const composer = new THREE.EffectComposer(renderer);
+  const renderPass = new THREE.RenderPass(scene, camera);
+  composer.addPass(renderPass);
+
+  const vhsPass = new THREE.ShaderPass({
+      uniforms: {
+          tDiffuse: { value: null },
+          time: { value: 0 },
+          rgbShift: { value: 0.003 }
+      },
+      vertexShader: document.getElementById('vhs-vertex').textContent,
+      fragmentShader: document.getElementById('vhs-fragment').textContent
+  });
+  vhsPass.renderToScreen = true;
+  composer.addPass(vhsPass);
+
+  const noFilterTexture = textureLoader.load('noFilter.png');
+
+  const ENTITY_COUNT = 10; 
+  const ENTITY_MIN_DISTANCE = 50; 
+  const ENTITY_MAX_DISTANCE = 200; 
+  const ENTITY_FOLLOW_SPEED = 0.1; 
+
+  function spawnEntities() {
+      for (const entity of entities) {
+          scene.remove(entity);
+      }
+      entities.clear();
+
+      for (let i = 0; i < ENTITY_COUNT; i++) {
+          const entity = createEntity();
+          const angle = (i / ENTITY_COUNT) * Math.PI * 2 + (Math.random() * 0.5);
+          const distance = ENTITY_MIN_DISTANCE + Math.random() * (ENTITY_MAX_DISTANCE - ENTITY_MIN_DISTANCE);
+          
+          entity.position.set(
+              camera.position.x + Math.cos(angle) * distance,
+              ENTITY_HEIGHT / 2,
+              camera.position.z + Math.sin(angle) * distance
+          );
+          
+          scene.add(entity);
+          entities.add(entity);
+      }
+  }
+
+  function checkPlayerCollision(newX, newZ) {
+      const COLLISION_DISTANCE = 5; // Minimum distance to keep from objects
+      let canMove = true;
+      let finalX = newX;
+      let finalZ = newZ;
+
+      // Check collisions with trees and other objects
+      scene.traverseVisible(object => {
+          if (object instanceof THREE.Mesh) {
+              // Skip ground, sky, crystals and entities
+              if (object === ground || object === sky || crystals.has(object) || entities.has(object)) {
+                  return;
+              }
+
+              const dx = object.position.x - newX;
+              const dz = object.position.z - newZ;
+              const distanceSquared = dx * dx + dz * dz;
+
+              if (distanceSquared < COLLISION_DISTANCE * COLLISION_DISTANCE) {
+                  canMove = false;
+                  // Calculate push-back direction
+                  const angle = Math.atan2(dz, dx);
+                  const pushDistance = COLLISION_DISTANCE - Math.sqrt(distanceSquared);
+                  finalX = newX - Math.cos(angle) * pushDistance;
+                  finalZ = newZ - Math.sin(angle) * pushDistance;
+              }
+          }
+      });
+
+      // Keep player within bounds
+      const MAX_DISTANCE = 300; // Increased from 200 to 300
+      const distanceFromCenter = Math.sqrt(finalX * finalX + finalZ * finalZ);
+      if (distanceFromCenter > MAX_DISTANCE) {
+          const angle = Math.atan2(finalZ, finalX);
+          finalX = Math.cos(angle) * MAX_DISTANCE;
+          finalZ = Math.sin(angle) * MAX_DISTANCE;
+          canMove = false;
+      }
+
+      return {
+          canMove,
+          x: finalX,
+          z: finalZ
+      };
+  }
+
+  function updateCrystals() {
+      const time = Date.now() * 0.001;
+      
+      for (const crystal of crystals) {
+          // Floating animation
+          crystal.position.y = crystal.userData.startY + Math.sin(time + crystal.userData.phase) * 0.5;
+          crystal.rotation.y += 0.02;
+          
+          // Collection detection
+          const dx = camera.position.x - crystal.position.x;
+          const dy = camera.position.y - crystal.position.y;
+          const dz = camera.position.z - crystal.position.z;
+          const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+          
+          if (distance < 3) {
+              scene.remove(crystal);
+              crystals.delete(crystal);
+              crystalsCollected++;
+              document.getElementById('crystal-counter').textContent = `${crystalsCollected}/${CRYSTAL_COUNT}`;
+              
+              // Check win condition
+              if (crystalsCollected >= CRYSTAL_COUNT) {
+                  gameStarted = false;
+                  document.getElementById('win-screen').style.display = 'block';
+                  document.getElementById('game-ui').style.display = 'none';
+                  document.getElementById('game-timer').style.display = 'none';
+                  document.exitPointerLock();
+              }
+          }
+          
+          // Update crystal indicator positions
+          if (crystal) {
+              const crystalScreenPosition = crystal.position.clone().project(camera);
+              const indicator = document.querySelector('.crystal-indicator').cloneNode(true);
+              document.body.appendChild(indicator);
+              
+              if (crystalScreenPosition.z < 1) {
+                  const x = (crystalScreenPosition.x + 1) / 2 * window.innerWidth;
+                  const y = -(crystalScreenPosition.y - 1) / 2 * window.innerHeight;
+                  
+                  indicator.style.transform = `translate(${x}px, ${y}px)`;
+                  indicator.style.display = 'block';
+              }
+              
+              // Clean up old indicators
+              setTimeout(() => {
+                  indicator.remove();
+              }, 100);
+          }
+      }
+  }
+
+  let gameStartTime; // Added for tracking game start time
+
+  function updateTimer() {
+      if (!gameStarted) return;
+      
+      const currentTime = Date.now();
+      const elapsedSeconds = Math.floor((currentTime - gameStartTime) / 1000);
+      timeRemaining = GAME_TIME - elapsedSeconds;
+      
+      if (timeRemaining <= 0) {
+          gameOver("Time's up!");
+          return;
+      }
+      
+      const minutes = Math.floor(timeRemaining / 60);
+      const seconds = timeRemaining % 60;
+      document.getElementById('game-timer').textContent = 
+          `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  function startGame() {
+      // Reset game state
+      gameStarted = true;
+      crystalsCollected = 0;
+      gameStartTime = Date.now(); // Initialize start time
+      timeRemaining = GAME_TIME;
+
+      document.getElementById('menu-overlay').style.display = 'none';
+      document.getElementById('death-menu').style.display = 'none';
+      document.getElementById('game-over').style.display = 'none';
+      document.getElementById('win-screen').style.display = 'none';
+      
+      document.getElementById('game-ui').style.display = 'block';
+      document.getElementById('game-timer').style.display = 'block';
+      
+      // Reset camera position to safe spawn point
+      const safeSpot = findSafeSpawnPosition();
+      camera.position.set(safeSpot.x, 4.5, safeSpot.z);
+      
+      // Reset crystals and entities
+      spawnCrystals();
+      spawnEntities();
+      
+      // Start timer
+      gameTimer = setInterval(updateTimer, 1000);
+      
+      // Request pointer lock for mouse controls
+      document.body.requestPointerLock();
+  }
+
+  function showInstructions() {
+      alert("Collect all crystals before the entities catch you. Use the joystick to move forward and backward and touch/drag to look around. The entities will chase you - don't let them get too close!");
+  }
+
+  function retryGame() {
+      // Hide death menu
+      document.getElementById('death-menu').style.display = 'none';
+      // Start new game
+      startGame();
+  }
+
+  function returnToMenu() {
+      // Reset game state
+      gameStarted = false;
+      clearInterval(gameTimer);
+      
+      // Hide all game screens
+      document.getElementById('death-menu').style.display = 'none';
+      document.getElementById('game-over').style.display = 'none';
+      document.getElementById('win-screen').style.display = 'none';
+      document.getElementById('game-ui').style.display = 'none';
+      document.getElementById('game-timer').style.display = 'none';
+      
+      // Show main menu
+      document.getElementById('menu-overlay').style.display = 'flex';
+      
+      // Reset camera position
+      const safeSpot = findSafeSpawnPosition();
+      camera.position.set(safeSpot.x, 4.5, safeSpot.z);
+  }
+
+  function showDeathMenu() {
+      gameStarted = false;
+      clearInterval(gameTimer);
+      document.getElementById('death-menu').style.display = 'flex';
+      document.getElementById('game-ui').style.display = 'none';
+      document.getElementById('game-timer').style.display = 'none';
+      document.exitPointerLock();
+  }
+
+  function triggerJumpscare() {
+      const jumpscare = document.getElementById('jumpscare');
+      jumpscare.style.display = 'block';
+      setTimeout(() => {
+          jumpscare.style.display = 'none';
+      }, 500);
+  }
+
+  const BASE_MOVE_SPEED = 0.225;
+  const SPRINT_MULTIPLIER = 1.4;
+  let isSprinting = false;
+
+  const fireflyGeometry = new THREE.BufferGeometry();
+  const fireflyPositions = new Float32Array(FIREFLY_COUNT * 3);
+  const fireflyVelocities = [];
+
+  for (let i = 0; i < FIREFLY_COUNT; i++) {
+      const i3 = i * 3;
+      const angle = Math.random() * Math.PI * 2;
+      const radius = Math.random() * FIREFLY_RADIUS;
+      
+      fireflyPositions[i3] = Math.cos(angle) * radius;
+      fireflyPositions[i3 + 1] = Math.random() * 20 + 2;
+      fireflyPositions[i3 + 2] = Math.sin(angle) * radius;
+      
+      fireflyVelocities.push({
+          x: (Math.random() - 0.5) * 0.1,
+          y: (Math.random() - 0.5) * 0.1,
+          z: (Math.random() - 0.5) * 0.1,
+          phase: Math.random() * Math.PI * 2
+      });
+  }
+
+  fireflyGeometry.setAttribute('position', new THREE.Float32BufferAttribute(fireflyPositions, 3));
+
+  const fireflyMaterial = new THREE.ShaderMaterial({
+      vertexShader: document.getElementById('firefly-vertex').textContent,
+      fragmentShader: document.getElementById('firefly-fragment').textContent,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+  });
+
+  const fireflies = new THREE.Points(fireflyGeometry, fireflyMaterial);
+  scene.add(fireflies);
+
+  function spawnCrystals() {
+      for (const crystal of crystals) {
+          scene.remove(crystal);
+      }
+      crystals.clear();
+      crystalsCollected = 0;
+      document.getElementById('crystal-counter').textContent = `${crystalsCollected}/${CRYSTAL_COUNT}`;
+
+      function isValidCrystalPosition(x, z) {
+          for (const crystal of crystals) {
+              const dx = crystal.position.x - x;
+              const dz = crystal.position.z - z;
+              if (dx * dx + dz * dz < 400) return false;
+          }
+          return true;
+      }
+
+      for (let i = 0; i < CRYSTAL_COUNT; i++) {
+          const crystal = new THREE.Mesh(new THREE.OctahedronGeometry(1, 0), new THREE.MeshPhongMaterial({
+              color: 0x00ffff,
+              emissive: 0x00ffff,
+              emissiveIntensity: 0.5,
+              transparent: true,
+              opacity: 0.8,
+              shininess: 100
+          }));
+          
+          let validPosition = false;
+          let attempts = 0;
+          let x, z;
+
+          while (!validPosition && attempts < 100) {
+              const angle = Math.random() * Math.PI * 2;
+              const distance = 50 + Math.random() * CRYSTAL_SPAWN_RADIUS;
+              x = camera.position.x + Math.cos(angle) * distance;
+              z = camera.position.z + Math.sin(angle) * distance;
+              
+              if (isValidCrystalPosition(x, z)) {
+                  validPosition = true;
+              }
+              attempts++;
+          }
+
+          crystal.position.set(x, 2, z);
+          
+          const crystalLight = new THREE.PointLight(0x00ffff, 2, 20);
+          crystalLight.position.set(0, 0, 0);
+          crystal.add(crystalLight);
+
+          crystal.userData.startY = crystal.position.y;
+          crystal.userData.phase = Math.random() * Math.PI * 2;
+          
+          scene.add(crystal);
+          crystals.add(crystal);
+      }
+  }
+
+  function createEntity() {
+      const geometry = new THREE.PlaneGeometry(8, ENTITY_HEIGHT);
+      const material = new THREE.MeshBasicMaterial({
+          map: noFilterTexture,
+          transparent: true,
+          opacity: 0.9,
+          side: THREE.DoubleSide
+      });
+      const entity = new THREE.Mesh(geometry, material);
+      
+      const angle = Math.random() * Math.PI * 2;
+      const distance = ENTITY_MAX_DISTANCE;
+      entity.position.set(
+          camera.position.x + Math.cos(angle) * distance,
+          ENTITY_HEIGHT / 2,
+          camera.position.z + Math.sin(angle) * distance
+      );
+      
+      const limbMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+      
+      const armGeometry = new THREE.BoxGeometry(0.5, 8, 0.5);
+      const leftArm = new THREE.Mesh(armGeometry, limbMaterial);
+      const rightArm = new THREE.Mesh(armGeometry, limbMaterial);
+      leftArm.position.set(-4, 0, 0);
+      rightArm.position.set(4, 0, 0);
+      entity.add(leftArm);
+      entity.add(rightArm);
+      
+      const legGeometry = new THREE.BoxGeometry(0.5, 10, 0.5);
+      const leftLeg = new THREE.Mesh(legGeometry, limbMaterial);
+      const rightLeg = new THREE.Mesh(legGeometry, limbMaterial);
+      leftLeg.position.set(-2, -ENTITY_HEIGHT / 2, 0);
+      rightLeg.position.set(2, -ENTITY_HEIGHT / 2, 0);
+      entity.add(leftLeg);
+      entity.add(rightLeg);
+
+      // Enable shadow casting for the entity
+      entity.castShadow = true;
+      entity.receiveShadow = true;
+      leftArm.castShadow = true;
+      rightArm.castShadow = true;
+      leftLeg.castShadow = true;
+      rightLeg.castShadow = true;
+
+      return entity;
+  }
+
+  function updateEntities() {
+      const WANDER_RADIUS = 100;
+      const DETECTION_RADIUS = 30; // Increased to 30 meters
+      const WANDER_SPEED = 0.02;
+      const CHASE_SPEED = 0.2; // Increased to 0.2
+
+      for (const entity of entities) {
+          const directionToPlayer = new THREE.Vector3(
+              camera.position.x - entity.position.x,
+              0,
+              camera.position.z - entity.position.z
+          );
+          
+          const distanceToPlayer = directionToPlayer.length();
+          
+          // Update entity behavior based on distance to player
+          if (distanceToPlayer < DETECTION_RADIUS) {
+              // Chase player when within detection radius
+              directionToPlayer.normalize();
+              entity.position.x += directionToPlayer.x * CHASE_SPEED;
+              entity.position.z += directionToPlayer.z * CHASE_SPEED;
+              entity.lookAt(camera.position);
+          } else {
+              // Wander behavior when player is far
+              if (!entity.userData.wanderAngle) {
+                  entity.userData.wanderAngle = Math.random() * Math.PI * 2;
+                  entity.userData.wanderChangeTime = Date.now() + Math.random() * 5000 + 2000;
+              }
+              
+              if (Date.now() > entity.userData.wanderChangeTime) {
+                  entity.userData.wanderAngle = Math.random() * Math.PI * 2;
+                  entity.userData.wanderChangeTime = Date.now() + Math.random() * 5000 + 2000;
+              }
+              
+              const wanderX = Math.cos(entity.userData.wanderAngle) * WANDER_SPEED;
+              const wanderZ = Math.sin(entity.userData.wanderAngle) * WANDER_SPEED;
+              
+              // Keep entities within wander radius
+              const distanceFromCenter = Math.sqrt(
+                  entity.position.x * entity.position.x + 
+                  entity.position.z * entity.position.z
+              );
+              
+              if (distanceFromCenter > WANDER_RADIUS) {
+                  const angleToCenter = Math.atan2(-entity.position.z, -entity.position.x);
+                  entity.userData.wanderAngle = angleToCenter;
+              }
+              
+              entity.position.x += wanderX;
+              entity.position.z += wanderZ;
+              entity.lookAt(
+                  entity.position.x + Math.cos(entity.userData.wanderAngle),
+                  entity.position.y,
+                  entity.position.z + Math.sin(entity.userData.wanderAngle)
+              );
+          }
+          
+          // Animate entity parts
+          const time = Date.now() * 0.003;
+          entity.children.forEach((limb, index) => {
+              limb.rotation.x = Math.sin(time + index) * 0.2;
+          });
+          
+          if (distanceToPlayer < JUMPSCARE_DISTANCE) {
+              triggerJumpscare();
+              showDeathMenu();
+          }
+      }
+  }
+
+  const keys = {};
+  window.addEventListener('keydown', (e) => {
+      keys[e.key.toLowerCase()] = true;
+      
+      if (e.key === 'Shift') {
+          isSprinting = true;
+      }
+  });
+
+  window.addEventListener('keyup', (e) => {
+      keys[e.key.toLowerCase()] = false;
+      
+      if (e.key === 'Shift') {
+          isSprinting = false;
+      }
+  });
+
+  function initMouseControls() {
+      document.addEventListener('mousemove', (e) => {
+          mouseX -= e.movementX * 0.002;
+          mouseY -= e.movementY * 0.002;
+          
+          mouseY = Math.max(-Math.PI/2, Math.min(Math.PI/2, mouseY));
+      });
+
+      document.addEventListener('click', () => {
+          document.body.requestPointerLock();
+      });
+  }
+
+  initMouseControls();
+
+  document.addEventListener('pointerlockchange', () => {
+      if (document.pointerLockElement) {
+          console.log('Pointer locked');
+      } else {
+          console.log('Pointer unlocked');
+      }
+  });
+
+  window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      composer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // Add touch handlers for joystick
+  const joystickContainer = document.getElementById('joystick-container');
+  const joystickKnob = document.getElementById('joystick-knob');
+
+  joystickContainer.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const rect = joystickContainer.getBoundingClientRect();
+      joystickStartX = touch.clientX - rect.left;
+      joystickStartY = touch.clientY - rect.top;
+      joystickActive = true;
+  });
+
+  joystickContainer.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (!joystickActive) return;
+
+      const touch = e.touches[0];
+      const rect = joystickContainer.getBoundingClientRect();
+      const x = touch.clientX - rect.left - joystickStartX;
+      const y = touch.clientY - rect.top - joystickStartY;
+
+      joystickDistance = Math.min(Math.sqrt(x * x + y * y), joystickMaxDistance);
+      joystickAngle = Math.atan2(y, x);
+
+      const knobX = Math.cos(joystickAngle) * joystickDistance;
+      const knobY = Math.sin(joystickAngle) * joystickDistance;
+
+      joystickKnob.setAttribute('cx', 50 + (knobX / joystickMaxDistance) * 30);
+      joystickKnob.setAttribute('cy', 50 + (knobY / joystickMaxDistance) * 30);
+  });
+
+  joystickContainer.addEventListener('touchend', () => {
+      joystickActive = false;
+      joystickKnob.setAttribute('cx', 50);
+      joystickKnob.setAttribute('cy', 50);
+  });
+
+  // Add touch handlers for camera control
+  const touchArea = document.getElementById('touch-area');
+
+  touchArea.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+  });
+
+  touchArea.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (!gameStarted || isInMenu()) return;
+
+      const touch = e.touches[0];
+      const movementX = touch.clientX - touchStartX;
+      const movementY = touch.clientY - touchStartY;
+
+      mouseX -= movementX * 0.01;
+      mouseY -= movementY * 0.01;
+      
+      mouseY = Math.max(-Math.PI/2, Math.min(Math.PI/2, mouseY));
+
+      touchStartX = touch.clientX;
+      touchStartY = touch.clientY;
+  });
+
+  spawnCrystals();
+  spawnEntities();
+
+  function updateFlashlight() {
+      if (!gameStarted || isInMenu()) return;
+      
+      // Get camera's direction vector
+      const cameraDirection = new THREE.Vector3();
+      camera.getWorldDirection(cameraDirection);
+      
+      // Position flashlight at camera position (player's head)
+      flashlight.position.set(
+          camera.position.x,
+          camera.position.y,
+          camera.position.z
+      );
+
+      // Point flashlight in camera's looking direction
+      flashlight.target.position.set(
+          camera.position.x + cameraDirection.x * 10,
+          camera.position.y + cameraDirection.y * 10,
+          camera.position.z + cameraDirection.z * 10
+      );
+      flashlight.target.updateMatrixWorld();
+
+      // Random chance to start flickering if not already flickering
+      if (!isFlickering && Math.random() < FLASHLIGHT_FLICKER_CHANCE) {
+          startFlicker();
+      }
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+    
+    vhsPass.uniforms.time.value = performance.now() * 0.001;
+    
+    if (!gameStarted || isInMenu()) {
+        composer.render();
+        return;
+    }
+
+    const direction = new THREE.Vector3();
+    if (joystickActive) {
+        // Calculate direction based on joystick angle
+        direction.set(
+            Math.cos(joystickAngle),
+            0,
+            Math.sin(joystickAngle)
+        );
+        
+        // Apply camera rotation
+        direction.applyAxisAngle(new THREE.Vector3(0, 1, 0), mouseX);
+        direction.y = 0;
+        direction.normalize();
+        
+        const moveSpeed = (joystickDistance / joystickMaxDistance) * BASE_MOVE_SPEED;
+        direction.multiplyScalar(moveSpeed);
+    } 
+
+    const newX = camera.position.x + direction.x;
+    const newZ = camera.position.z + direction.z;
+
+    const collisionResult = checkPlayerCollision(newX, newZ);
+
+    if (collisionResult.canMove) {
+        camera.position.x = collisionResult.x;
+        camera.position.z = collisionResult.z;
+    }
+
+    camera.rotation.order = 'YXZ';
+    camera.rotation.x = mouseY;
+    camera.rotation.y = mouseX;
+
+    updateFlashlight(); // Update flashlight position
+
+    if (gameStarted && !isInMenu()) {
+        updateCrystals();
+        updateEntities();
+        updateTimer(); // Update timer during gameplay
+    }
+
+    // Update atmosphere
+    updateAtmosphere();
+
+    composer.render();
+  }
+
+  function updateAtmosphere() {
+      // Update fireflies
+      const positions = fireflies.geometry.attributes.position.array;
+      
+      for (let i = 0; i < FIREFLY_COUNT; i++) {
+          const i3 = i * 3;
+          const velocity = fireflyVelocities[i];
+          
+          // Update position with velocity
+          positions[i3] += velocity.x;
+          positions[i3 + 1] += velocity.y;
+          positions[i3 + 2] += velocity.z;
+          
+          // Add sine wave motion
+          positions[i3 + 1] += Math.sin(Date.now() * 0.001 + velocity.phase) * 0.02;
+          
+          // Keep within bounds
+          const distance = Math.sqrt(
+              positions[i3] * positions[i3] + 
+              positions[i3 + 2] * positions[i3 + 2]
+          );
+          
+          if (distance > FIREFLY_RADIUS || 
+              positions[i3 + 1] < 0 || 
+              positions[i3 + 1] > 20) {
+              // Reset position if out of bounds
+              const angle = Math.random() * Math.PI * 2;
+              const radius = Math.random() * FIREFLY_RADIUS;
+              
+              positions[i3] = Math.cos(angle) * radius;
+              positions[i3 + 1] = Math.random() * 20 + 2;
+              positions[i3 + 2] = Math.sin(angle) * radius;
+          }
+      }
+      
+      fireflies.geometry.attributes.position.needsUpdate = true;
+      
+      // Update pulsing ambient light
+      const time = Date.now() * 0.001;
+      pulsingLight.intensity = 0.1 + Math.sin(time) * 0.05;
+      
+      // Update VHS effect intensity
+      vhsPass.uniforms.rgbShift.value = 0.003 + Math.sin(time * 0.5) * 0.001;
+      
+      // Animate sky particles
+      skyParticleSystem.rotation.y += 0.0001;
+  }
+
+  function gameOver(reason) {
+      gameStarted = false;
+      clearInterval(gameTimer);
+      
+      document.getElementById('game-over').style.display = 'block';
+      document.getElementById('game-over-reason').textContent = reason;
+      document.getElementById('game-ui').style.display = 'none';
+      document.getElementById('game-timer').style.display = 'none';
+      
+      document.exitPointerLock();
+  }
+
+  const safeSpot = findSafeSpawnPosition();
+  camera.position.set(safeSpot.x, 4.5, safeSpot.z);
+
+  spawnCrystals();
+  spawnEntities();
+
+  animate();
+</script>
+
+</body></html>
