@@ -1,0 +1,194 @@
+
+<!DOCTYPE html><html lang="fr" w-tid="1">
+<head w-tid="3">
+    
+<title>TuneFlow</title>
+<meta property="og:title" content="TuneFlow"/>
+<meta property="og:url" content="https://tuneflow--mistysparkle36977549.on.websim.ai?v=18"/>
+<meta property="og:type" content="website"/>
+<meta property="twitter:card" content="summary_large_image"/>
+<meta property="og:image" content="https://images.websim.ai/v1/project/y5kjk8ubv9x8cae8f_oy/revision/18/1200.jpeg"/>
+<meta property="twitter:image" content="https://images.websim.ai/v1/project/y5kjk8ubv9x8cae8f_oy/revision/18/1200.jpeg"/>
+<link rel="stylesheet" href="https://api.websim.ai/fonts.css?v=f18593710697bdd7a55514cb367d8672a2131a98">
+<link rel="stylesheet" href="https://api.websim.ai/ctxmenu.css?v=f18593710697bdd7a55514cb367d8672a2131a98">
+<script class="websim-injected">__WEBSIM_DATA__={"home":false,"hostOrigin":"https://websim.ai","isTopLevelFrame":true,"project_id":"y5kjk8ubv9x8cae8f_oy","route":{"type":"slug","username":"mistysparkle36977549","slug":"tuneflow"}}</script>
+<script class="websim-injected" src="https://api.websim.ai/dist/index.js?v=f18593710697bdd7a55514cb367d8672a2131a98"></script>
+<meta charset="UTF-8" w-tid="5"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" w-tid="7"/>
+    <!--title>TuneFlow</title-->
+    <link rel="stylesheet" href="style.css" w-tid="11"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" w-tid="13"/>
+    <script src="https://www.youtube.com/iframe_api" w-tid="15"></script>
+</head>
+<body w-tid="17">
+    <div id="app" w-tid="19">
+        <!-- Splash Screen -->
+        <div id="splash-screen" w-tid="21">
+            <div class="splash-logo" w-tid="23">
+                <i class="fas fa-music" w-tid="25"></i>
+                <h1 w-tid="27">TuneFlow</h1>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <header w-tid="29">
+            <div class="header-content" w-tid="31">
+                <h1 w-tid="33">TuneFlow</h1>
+                <div class="search-container" w-tid="35">
+                    <input type="text" id="search-input" placeholder="Rechercher une musique..." w-tid="37"/>
+                    <button id="search-button" w-tid="39"><i class="fas fa-search" w-tid="41"></i></button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main w-tid="43">
+            <!-- Home View -->
+            <section id="home-view" class="view active" w-tid="45">
+                <div class="section-title" w-tid="47">
+                    <h2 w-tid="49">Écoutes récentes</h2>
+                </div>
+                <div class="recent-tracks scroll-container" id="recent-tracks" w-tid="51">
+                    <!-- Content will be dynamically added -->
+                </div>
+
+                <div class="section-title" w-tid="53">
+                    <h2 w-tid="55">Vos playlists</h2>
+                </div>
+                <div class="playlists-container scroll-container" id="playlists-container" w-tid="57">
+                    <!-- Content will be dynamically added -->
+                </div>
+            </section>
+
+            <!-- Search Results View -->
+            <section id="search-view" class="view" w-tid="59">
+                <div class="section-title" w-tid="61">
+                    <h2 w-tid="63">Résultats</h2>
+                </div>
+                <div class="search-results scroll-container" id="search-results" w-tid="65">
+                    <!-- Content will be dynamically added -->
+                </div>
+            </section>
+
+            <!-- Playlist View -->
+            <section id="playlist-view" class="view" w-tid="67">
+                <div class="playlist-header" w-tid="69">
+                    <button id="back-to-home" class="back-button" w-tid="71"><i class="fas fa-arrow-left" w-tid="73"></i></button>
+                    <div id="playlist-info" w-tid="75">
+                        <h2 id="playlist-title" w-tid="77">Playlist</h2>
+                        <p id="playlist-count" w-tid="79">0 titres</p>
+                    </div>
+                    <button id="add-to-playlist" class="add-button" w-tid="81"><i class="fas fa-plus" w-tid="83"></i></button>
+                </div>
+                <div class="playlist-tracks scroll-container" id="playlist-tracks" w-tid="85">
+                    <!-- Content will be dynamically added -->
+                </div>
+            </section>
+
+            <!-- Library View -->
+            <section id="library-view" class="view" w-tid="87">
+                <div class="section-title" w-tid="89">
+                    <h2 w-tid="91">Bibliothèque</h2>
+                </div>
+                <div class="playlists-container scroll-container" id="library-playlists" w-tid="93">
+                    <!-- Library playlists will be rendered here -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Now Playing Bar -->
+        <div id="now-playing-bar" w-tid="95">
+            <div class="now-playing-info" w-tid="97">
+                <div class="thumbnail" id="current-thumbnail" w-tid="99">
+                    <i class="fas fa-music" w-tid="101"></i>
+                </div>
+                <div class="track-info" w-tid="103">
+                    <div id="current-title" w-tid="105">Pas de titre en lecture</div>
+                    <div id="current-artist" w-tid="107">-</div>
+                </div>
+            </div>
+            <div class="player-controls" w-tid="109">
+                <button id="like-button" w-tid="111"><i class="far fa-heart" w-tid="113"></i></button>
+                <button id="play-pause-button" w-tid="115"><i class="fas fa-play" w-tid="117"></i></button>
+                <button id="repeat-button" w-tid="119"><i class="fas fa-redo" w-tid="121"></i></button>
+            </div>
+        </div>
+
+        <!-- Expanded Player -->
+        <div id="player-expanded" w-tid="123">
+            <div id="player-background" class="player-background" w-tid="125">
+              <div id="yt-player" w-tid="127"></div>
+            </div>
+            <div class="ambient-overlay" w-tid="129"></div>
+
+            <div class="player-header" w-tid="131">
+                <button id="close-player" w-tid="133"><i class="fas fa-chevron-down" w-tid="135"></i></button>
+                <div w-tid="137">Lecture en cours</div>
+                <div style="width: 24px;" w-tid="139"></div><!-- Spacer for alignment -->
+            </div>
+            
+            <div class="player-artwork" w-tid="141">
+                <div class="artwork-container" id="expanded-thumbnail" w-tid="143">
+                    <i class="fas fa-music" w-tid="145"></i>
+                </div>
+            </div>
+            
+            <div class="player-info" w-tid="147">
+                <div class="player-title" id="expanded-title" w-tid="149">Pas de titre en lecture</div>
+                <div class="player-artist" id="expanded-artist" w-tid="151">-</div>
+                
+                <div class="progress-container" id="progress-container" w-tid="153">
+                    <div id="progress-bar" w-tid="155"></div>
+                </div>
+                
+                <div class="time-info" w-tid="157">
+                    <span id="current-time" w-tid="159">0:00</span>
+                    <span id="duration" w-tid="161">0:00</span>
+                </div>
+                
+                <div class="expanded-controls" w-tid="163">
+                    <button id="prev-button-expanded" w-tid="165"><i class="fas fa-step-backward" w-tid="167"></i></button>
+                    <button id="play-pause-button-expanded" w-tid="169"><i class="fas fa-play" w-tid="171"></i></button>
+                    <button id="next-button-expanded" w-tid="173"><i class="fas fa-step-forward" w-tid="175"></i></button>
+                    <button id="repeat-button-expanded" w-tid="177"><i class="fas fa-redo" w-tid="179"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Bar -->
+        <nav w-tid="181">
+            <button class="nav-button active" data-view="home-view" w-tid="183">
+                <i class="fas fa-home" w-tid="185"></i>
+                <span w-tid="187">Accueil</span>
+            </button>
+            <button class="nav-button" data-view="search-view" w-tid="189">
+                <i class="fas fa-search" w-tid="191"></i>
+                <span w-tid="193">Recherche</span>
+            </button>
+            <button class="nav-button" data-view="library-view" id="library-button" w-tid="195">
+                <i class="fas fa-book" w-tid="197"></i>
+                <span w-tid="199">Bibliothèque</span>
+            </button>
+        </nav>
+
+        <!-- Modal for creating/adding to playlist -->
+        <div id="playlist-modal" class="modal" w-tid="201">
+            <div class="modal-content" w-tid="203">
+                <div class="modal-header" w-tid="205">
+                    <h3 w-tid="207">Ajouter à une playlist</h3>
+                    <button id="close-modal" w-tid="209"><i class="fas fa-times" w-tid="211"></i></button>
+                </div>
+                <div class="modal-playlists" id="modal-playlists" w-tid="213">
+                    <!-- Playlists will be added here -->
+                </div>
+                <div class="create-playlist" w-tid="215">
+                    <input type="text" id="new-playlist-name" placeholder="Nom de la nouvelle playlist" w-tid="217"/>
+                    <button id="create-playlist-button" w-tid="219">Créer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js" w-tid="221"></script>
+</body>
+</html>
